@@ -10,6 +10,8 @@ import { CaseStatus } from '@/types';
 import { CaseStatusChip } from '@/components/ui/StatusChip';
 import { formatDate } from '@/utils/format';
 
+// Helllo
+
 const PLACEHOLDER_STATS = [
   { label: 'Active Clients', value: '—', icon: <PeopleIcon color="primary" /> },
   { label: 'Open Cases', value: '—', icon: <GavelIcon color="primary" /> },

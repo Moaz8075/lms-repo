@@ -1,0 +1,26 @@
+{
+  "name": "lms-repo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lawyer Case Management SaaS - Monorepo",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "backend:build": "yarn workspace @lms/backend build",
+    "backend:dev": "yarn workspace @lms/backend start:dev",
+    "backend:start": "yarn workspace @lms/backend start:prod",
+    "backend:lint": "yarn workspace @lms/backend lint",
+    "backend:test": "yarn workspace @lms/backend test",
+    "prisma:generate": "yarn workspace @lms/backend prisma:generate",
+    "prisma:migrate": "yarn workspace @lms/backend prisma:migrate",
+    "prisma:studio": "yarn workspace @lms/backend prisma:studio",
+    "prisma:seed": "yarn workspace @lms/backend prisma:seed",
+    "frontend:dev": "yarn workspace @lms/frontend dev",
+    "frontend:build": "yarn workspace @lms/frontend build",
+    "frontend:start": "yarn workspace @lms/frontend start"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

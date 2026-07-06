@@ -10,17 +10,21 @@ import {
 import { PrismaModule } from './prisma';
 import { GlobalExceptionFilter } from './common/filters';
 import { ResponseInterceptor, LoggingInterceptor } from './common/interceptors';
-import { JwtAuthGuard } from './common/guards';
+import { JwtAuthGuard, PermissionsGuard, RolesGuard } from './common/guards';
+import { PermissionsModule } from './common/permissions/permissions.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { UsersModule } from './modules/users/users.module';
 import { ClientsModule } from './modules/clients/clients.module';
 import { CasesModule } from './modules/cases/cases.module';
 import { HearingsModule } from './modules/hearings/hearings.module';
-import { CaseDiaryModule } from './modules/case-diary/case-diary.module';
+import { DiaryModule } from './modules/diary/diary.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { ExpensesModule } from './modules/expenses/expenses.module';
+import { LegalLibraryModule } from './modules/legal-library/legal-library.module';
+import { LegalNotesModule } from './modules/legal-notes/legal-notes.module';
 import { ActivityLogsModule } from './modules/activity-logs/activity-logs.module';
 
 @Module({
@@ -32,16 +36,20 @@ import { ActivityLogsModule } from './modules/activity-logs/activity-logs.module
       envFilePath: ['.env'],
     }),
     PrismaModule,
+    PermissionsModule,
     AuthModule,
     OrganizationsModule,
     UsersModule,
     ClientsModule,
     CasesModule,
     HearingsModule,
-    CaseDiaryModule,
+    DiaryModule,
+    TasksModule,
     DocumentsModule,
     PaymentsModule,
     ExpensesModule,
+    LegalLibraryModule,
+    LegalNotesModule,
     ActivityLogsModule,
   ],
   providers: [
@@ -60,6 +68,14 @@ import { ActivityLogsModule } from './modules/activity-logs/activity-logs.module
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionsGuard,
     },
   ],
 })

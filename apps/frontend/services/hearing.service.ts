@@ -1,9 +1,19 @@
 import { api, unwrap } from './api';
-import type { Hearing, PaginatedResult, PaginationParams } from '@/types';
+import type {
+  CaseScopedParams,
+  CreateHearingPayload,
+  Hearing,
+  PaginatedResult,
+  UpdateHearingPayload,
+} from '@/types';
 
 export const hearingService = {
-  list: (params?: PaginationParams & { caseId?: string }) =>
+  list: (params: CaseScopedParams) =>
     unwrap<PaginatedResult<Hearing>>(api.get('/hearings', { params })),
 
-  getById: (id: string) => unwrap<Hearing>(api.get(`/hearings/${id}`)),
+  create: (payload: CreateHearingPayload) =>
+    unwrap<Hearing>(api.post('/hearings', payload)),
+
+  update: (id: string, payload: UpdateHearingPayload) =>
+    unwrap<Hearing>(api.patch(`/hearings/${id}`, payload)),
 };

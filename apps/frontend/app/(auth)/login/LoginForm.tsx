@@ -47,6 +47,7 @@ export default function LoginForm() {
       setAuth({
         user: response.user,
         organization: response.organization,
+        permissions: response.permissions,
         accessToken: response.tokens.accessToken,
         refreshToken: response.tokens.refreshToken,
       });

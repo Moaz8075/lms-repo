@@ -1,12 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthenticatedUser, JwtPayload } from '../../../common/interfaces';
+import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(configService: ConfigService) {
+  constructor(
+    configService: ConfigService,
+    private readonly prisma: PrismaService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -14,12 +21,33 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  validate(payload: JwtPayload): AuthenticatedUser {
+  async validate(payload: JwtPayload): Promise<AuthenticatedUser> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: payload.sub,
+        organizationId: payload.organizationId,
+        isActive: true,
+      },
+      include: {
+        organization: {
+          select: { status: true },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+
+    if (user.organization.status === 'SUSPENDED' || user.organization.status === 'INACTIVE') {
+      throw new UnauthorizedException('Organization is not active');
+    }
+
     return {
-      id: payload.sub,
-      email: payload.email,
-      organizationId: payload.organizationId,
-      role: payload.role,
+      id: user.id,
+      email: user.email,
+      organizationId: user.organizationId,
+      role: user.role,
     };
   }
 }

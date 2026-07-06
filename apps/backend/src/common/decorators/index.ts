@@ -9,6 +9,12 @@ export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
 export const Roles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles);
 
+export {
+  PermissionResourceScope,
+  PermissionActionScope,
+  SkipPermission,
+} from './permissions.decorator';
+
 export const CurrentUser = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext): AuthenticatedUser => {
     const request = ctx.switchToHttp().getRequest<{ user: AuthenticatedUser }>();

@@ -1,9 +1,21 @@
 import { api, unwrap } from './api';
-import type { PaginatedResult, PaginationParams, Payment } from '@/types';
+import type {
+  CaseScopedParams,
+  CreatePaymentPayload,
+  Payment,
+  PaymentsListResult,
+  UpdatePaymentPayload,
+} from '@/types';
 
 export const paymentService = {
-  list: (params?: PaginationParams & { caseId?: string }) =>
-    unwrap<PaginatedResult<Payment>>(api.get('/payments', { params })),
+  list: (params: CaseScopedParams) =>
+    unwrap<PaymentsListResult>(api.get('/payments', { params })),
 
-  getById: (id: string) => unwrap<Payment>(api.get(`/payments/${id}`)),
+  create: (payload: CreatePaymentPayload) =>
+    unwrap<Payment>(api.post('/payments', payload)),
+
+  update: (id: string, payload: UpdatePaymentPayload) =>
+    unwrap<Payment>(api.patch(`/payments/${id}`, payload)),
+
+  delete: (id: string) => unwrap<void>(api.delete(`/payments/${id}`)),
 };

@@ -13,22 +13,22 @@ import Typography from '@mui/material/Typography';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import GavelIcon from '@mui/icons-material/Gavel';
-import EventIcon from '@mui/icons-material/Event';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import FolderIcon from '@mui/icons-material/Folder';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BalanceIcon from '@mui/icons-material/Balance';
 import { NAV_ITEMS, SIDEBAR_WIDTH } from '@/utils/constants';
+import { usePermissions } from '@/hooks/usePermissions';
+import { PermissionResource } from '@/types/permissions';
 
 const ICON_MAP = {
   Dashboard: DashboardIcon,
   People: PeopleIcon,
   Gavel: GavelIcon,
-  Event: EventIcon,
   MenuBook: MenuBookIcon,
-  Folder: FolderIcon,
+  LibraryBooks: LibraryBooksIcon,
   Payments: PaymentsIcon,
   Receipt: ReceiptIcon,
   Settings: SettingsIcon,
@@ -41,11 +41,22 @@ interface SidebarProps {
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const { isAdmin, canView } = usePermissions();
+
+  const visibleItems = NAV_ITEMS.filter((item) => {
+    if ('adminOnly' in item && item.adminOnly) return isAdmin;
+    if ('resource' in item && item.resource) {
+      return canView(item.resource as PermissionResource);
+    }
+    return true;
+  });
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Box sx={{ px: 2.5, py: 2.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <BalanceIcon color="primary" />
+      <Box sx={{ px: 2.5, py: 2.5, display: 'flex', alignItems: 'center', gap: 1.5, bgcolor: '#F4F8FF', borderBottom: '1px solid #E8F0FE' }}>
+        <Box sx={{ width: 36, height: 36, borderRadius: 2, bgcolor: '#1A73E8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+          <BalanceIcon sx={{ fontSize: 22 }} />
+        </Box>
         <Box>
           <Typography variant="subtitle1" fontWeight={700} lineHeight={1.2}>
             LegalEase
@@ -57,7 +68,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </Box>
 
       <List sx={{ px: 1.5, flex: 1 }}>
-        {NAV_ITEMS.map((item) => {
+        {visibleItems.map((item) => {
           const Icon = ICON_MAP[item.icon];
           const isActive =
             item.href === '/'
@@ -73,11 +84,14 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 onClick={onNavigate}
                 sx={{
                   borderRadius: 2,
+                  borderLeft: '3px solid transparent',
                   '&.Mui-selected': {
-                    bgcolor: 'primary.main',
-                    color: 'primary.contrastText',
-                    '& .MuiListItemIcon-root': { color: 'primary.contrastText' },
-                    '&:hover': { bgcolor: 'primary.dark' },
+                    bgcolor: '#E8F0FE',
+                    color: 'primary.main',
+                    borderLeftColor: 'primary.main',
+                    fontWeight: 600,
+                    '& .MuiListItemIcon-root': { color: 'primary.main' },
+                    '&:hover': { bgcolor: '#D2E3FC' },
                   },
                 }}
               >

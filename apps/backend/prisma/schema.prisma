@@ -15,8 +15,10 @@ enum UserRole {
   SUPER_ADMIN
   ORG_ADMIN
   LAWYER
+  SENIOR_LAWYER
   ASSOCIATE
   CLERK
+  ACCOUNTANT
   CLIENT
 }
 
@@ -34,6 +36,16 @@ enum CaseStatus {
   ARCHIVED
 }
 
+enum CaseType {
+  CIVIL
+  CRIMINAL
+  FAMILY
+  CORPORATE
+  CONSTITUTIONAL
+  REVENUE
+  OTHER
+}
+
 enum HearingOutcome {
   PENDING
   ADJOURNED
@@ -43,6 +55,13 @@ enum HearingOutcome {
   WITHDRAWN
   PARTIAL
   CANCELLED
+}
+
+enum DocumentFileType {
+  PDF
+  IMAGE
+  DOC
+  OTHER
 }
 
 enum PaymentStatus {
@@ -57,6 +76,8 @@ enum PaymentStatus {
 enum PaymentMethod {
   CASH
   BANK_TRANSFER
+  JAZZCASH
+  EASYPAISA
   CHEQUE
   ONLINE
   CARD
@@ -93,6 +114,21 @@ enum ActivityType {
   RESTORE
 }
 
+enum TaskType {
+  HEARING
+  CLIENT_MEETING
+  DOCUMENT_PREPARATION
+  COURT_WORK
+  PERSONAL
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
 // ---------------------------------------------------------------------------
 // Organization (tenant root)
 // ---------------------------------------------------------------------------
@@ -101,6 +137,9 @@ model Organization {
   id        String             @id @default(uuid()) @db.Uuid
   name      String             @db.VarChar(255)
   slug      String             @unique @db.VarChar(100)
+  phone     String?            @db.VarChar(20)
+  address   String?            @db.Text
+  logo      String?            @db.VarChar(500)
   status    OrganizationStatus @default(TRIAL)
   settings  Json               @default("{}")
   createdAt DateTime           @default(now()) @map("created_at")
@@ -110,12 +149,14 @@ model Organization {
   clients       Client[]       @relation("OrganizationClients")
   cases         Case[]         @relation("OrganizationCases")
   hearings      Hearing[]      @relation("OrganizationHearings")
-  caseDiaries   CaseDiary[]    @relation("OrganizationCaseDiaries")
+  tasks         Task[]         @relation("OrganizationTasks")
   documents     Document[]     @relation("OrganizationDocuments")
   payments      Payment[]      @relation("OrganizationPayments")
   expenses      Expense[]      @relation("OrganizationExpenses")
   activityLogs  ActivityLog[]  @relation("OrganizationActivityLogs")
   refreshTokens RefreshToken[] @relation("OrganizationRefreshTokens")
+  libraryItems  LibraryItem[]  @relation("OrganizationLibraryItems")
+  legalNotes    LegalNote[]    @relation("OrganizationLegalNotes")
 
   @@map("organizations")
 }
@@ -144,12 +185,14 @@ model User {
   assignedCases    Case[]        @relation("CaseAssignedLawyer")
   createdCases     Case[]        @relation("CaseCreatedBy")
   updatedCases     Case[]        @relation("CaseUpdatedBy")
-  caseDiaryEntries CaseDiary[]   @relation("CaseDiaryAuthor")
+  createdTasks     Task[]        @relation("TaskCreator")
   uploadedDocuments Document[]   @relation("DocumentUploader")
   recordedExpenses Expense[]     @relation("ExpenseRecorder")
   recordedPayments Payment[]     @relation("PaymentRecorder")
   activityLogs     ActivityLog[] @relation("ActivityLogActor")
   refreshTokens    RefreshToken[] @relation("UserRefreshTokens")
+  legalNotes       LegalNote[]   @relation("LegalNoteCreator")
+  caseReferences   CaseReference[] @relation("CaseReferenceAttacher")
 
   @@unique([organizationId, email], name: "users_org_email_unique")
   @@index([organizationId], name: "users_organization_id_idx")
@@ -166,8 +209,10 @@ model Client {
   organizationId String   @map("organization_id") @db.Uuid
   firstName      String   @map("first_name") @db.VarChar(100)
   lastName       String   @map("last_name") @db.VarChar(100)
+  fatherName     String?  @map("father_name") @db.VarChar(100)
   cnic           String?  @db.VarChar(15)
   phone          String   @db.VarChar(20)
+  whatsapp       String?  @db.VarChar(20)
   email          String?  @db.VarChar(255)
   address        String?  @db.Text
   city           String?  @db.VarChar(100)
@@ -181,6 +226,7 @@ model Client {
   payments     Payment[]    @relation("ClientPayments")
 
   @@unique([organizationId, cnic], name: "clients_org_cnic_unique")
+  @@unique([organizationId, phone], name: "clients_org_phone_unique")
   @@index([organizationId], name: "clients_organization_id_idx")
   @@index([cnic], name: "clients_cnic_idx")
   @@index([phone], name: "clients_phone_idx")
@@ -200,15 +246,18 @@ model Case {
   updatedById      String?    @map("updated_by_id") @db.Uuid
   caseNumber       String     @map("case_number") @db.VarChar(50)
   title            String     @db.VarChar(255)
+  caseType         CaseType   @default(CIVIL) @map("case_type")
   description      String?    @db.Text
   status           CaseStatus @default(OPEN)
   courtName        String?    @map("court_name") @db.VarChar(255)
   courtLocation    String?    @map("court_location") @db.VarChar(255)
   judgeName        String?    @map("judge_name") @db.VarChar(255)
   opposingParty    String?    @map("opposing_party") @db.VarChar(255)
+  opposingLawyer   String?    @map("opposing_lawyer") @db.VarChar(255)
   filedDate        DateTime?  @map("filed_date") @db.Date
   closedDate       DateTime?  @map("closed_date") @db.Date
   nextHearingDate  DateTime?  @map("next_hearing_date")
+  isActive         Boolean    @default(true) @map("is_active")
   metadata         Json       @default("{}")
   createdAt        DateTime   @default(now()) @map("created_at")
   updatedAt        DateTime   @updatedAt @map("updated_at")
@@ -220,10 +269,11 @@ model Case {
   updatedBy      User?        @relation("CaseUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
 
   hearings    Hearing[]   @relation("CaseHearings")
-  caseDiaries CaseDiary[] @relation("CaseDiaryEntries")
+  tasks       Task[]      @relation("CaseTasks")
   documents   Document[]  @relation("CaseDocuments")
   payments    Payment[]   @relation("CasePayments")
   expenses    Expense[]   @relation("CaseExpenses")
+  caseReferences CaseReference[] @relation("CaseLegalReferences")
 
   @@unique([organizationId, caseNumber], name: "cases_org_case_number_unique")
   @@index([organizationId], name: "cases_organization_id_idx")
@@ -245,6 +295,7 @@ model Hearing {
   scheduledDate         DateTime        @map("scheduled_date")
   actualDate            DateTime?       @map("actual_date")
   courtRoom             String?         @map("court_room") @db.VarChar(100)
+  purpose               String?         @db.VarChar(255)
   judgeName             String?         @map("judge_name") @db.VarChar(255)
   outcome               HearingOutcome  @default(PENDING)
   notes                 String?         @db.Text
@@ -264,29 +315,32 @@ model Hearing {
 }
 
 // ---------------------------------------------------------------------------
-// Case Diary (Roznamcha)
+// Task (agenda items — integrated into Diary view)
 // ---------------------------------------------------------------------------
 
-model CaseDiary {
-  id             String   @id @default(uuid()) @db.Uuid
-  organizationId String   @map("organization_id") @db.Uuid
-  caseId         String   @map("case_id") @db.Uuid
-  authorId       String   @map("author_id") @db.Uuid
-  entryDate      DateTime @map("entry_date") @db.Date
-  title          String?  @db.VarChar(255)
-  content        String   @db.Text
-  isPinned       Boolean  @default(false) @map("is_pinned")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+model Task {
+  id             String     @id @default(uuid()) @db.Uuid
+  organizationId String     @map("organization_id") @db.Uuid
+  caseId         String?    @map("case_id") @db.Uuid
+  createdById    String     @map("created_by_id") @db.Uuid
+  title          String     @db.VarChar(255)
+  description    String?    @db.Text
+  date           DateTime   @db.Date
+  time           String?    @db.VarChar(5)
+  type           TaskType   @default(COURT_WORK)
+  status         TaskStatus @default(PENDING)
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
 
-  organization Organization @relation("OrganizationCaseDiaries", fields: [organizationId], references: [id], onDelete: Cascade)
-  case         Case         @relation("CaseDiaryEntries", fields: [caseId], references: [id], onDelete: Cascade)
-  author       User         @relation("CaseDiaryAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  organization Organization @relation("OrganizationTasks", fields: [organizationId], references: [id], onDelete: Cascade)
+  case         Case?        @relation("CaseTasks", fields: [caseId], references: [id], onDelete: SetNull)
+  createdBy    User         @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Restrict)
 
-  @@index([organizationId], name: "case_diaries_organization_id_idx")
-  @@index([caseId], name: "case_diaries_case_id_idx")
-  @@index([entryDate], name: "case_diaries_entry_date_idx")
-  @@map("case_diaries")
+  @@index([organizationId], name: "tasks_organization_id_idx")
+  @@index([caseId], name: "tasks_case_id_idx")
+  @@index([date], name: "tasks_date_idx")
+  @@index([organizationId, date], name: "tasks_org_date_idx")
+  @@map("tasks")
 }
 
 // ---------------------------------------------------------------------------
@@ -294,19 +348,22 @@ model CaseDiary {
 // ---------------------------------------------------------------------------
 
 model Document {
-  id             String   @id @default(uuid()) @db.Uuid
-  organizationId String   @map("organization_id") @db.Uuid
-  caseId         String   @map("case_id") @db.Uuid
-  uploadedById   String   @map("uploaded_by_id") @db.Uuid
-  fileName       String   @map("file_name") @db.VarChar(255)
-  storageKey     String   @map("storage_key") @db.VarChar(500)
-  mimeType       String   @map("mime_type") @db.VarChar(100)
-  fileSize       Int      @map("file_size")
-  description    String?  @db.Text
-  tags           String[] @default([])
-  checksum       String?  @db.VarChar(64)
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @map("organization_id") @db.Uuid
+  caseId         String           @map("case_id") @db.Uuid
+  uploadedById   String           @map("uploaded_by_id") @db.Uuid
+  fileName       String           @map("file_name") @db.VarChar(255)
+  storageKey     String           @map("storage_key") @db.VarChar(500)
+  fileType       DocumentFileType @default(OTHER) @map("file_type")
+  mimeType       String           @map("mime_type") @db.VarChar(100)
+  fileSize       Int              @default(0) @map("file_size")
+  category       String?          @db.VarChar(100)
+  description    String?          @db.Text
+  tags           String[]         @default([])
+  checksum       String?          @db.VarChar(64)
+  isActive       Boolean          @default(true) @map("is_active")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
 
   organization Organization @relation("OrganizationDocuments", fields: [organizationId], references: [id], onDelete: Cascade)
   case         Case         @relation("CaseDocuments", fields: [caseId], references: [id], onDelete: Cascade)
@@ -337,6 +394,7 @@ model Payment {
   paidDate        DateTime?     @map("paid_date") @db.Date
   reminderSentAt  DateTime?     @map("reminder_sent_at")
   metadata        Json          @default("{}")
+  isActive        Boolean       @default(true) @map("is_active")
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 
@@ -433,4 +491,91 @@ model RefreshToken {
   @@index([userId], name: "refresh_tokens_user_id_idx")
   @@index([expiresAt], name: "refresh_tokens_expires_at_idx")
   @@map("refresh_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// Legal Research — Library (judgments, books, reference PDFs)
+// ---------------------------------------------------------------------------
+
+model LibraryItem {
+  id               String   @id @default(uuid()) @db.Uuid
+  organizationId   String?  @map("organization_id") @db.Uuid
+  title            String   @db.VarChar(500)
+  citation         String?  @db.VarChar(255)
+  court            String?  @db.VarChar(255)
+  jurisdiction     String?  @db.VarChar(255)
+  year             Int?
+  category         String?  @db.VarChar(100)
+  author           String?  @db.VarChar(255)
+  pdfUrl           String   @map("pdf_url") @db.VarChar(500)
+  totalPages       Int      @default(0) @map("total_pages")
+  description      String?  @db.Text
+  tags             String[] @default([])
+  isSystemDocument Boolean  @default(false) @map("is_system_document")
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  organization Organization? @relation("OrganizationLibraryItems", fields: [organizationId], references: [id], onDelete: Cascade)
+  legalNotes   LegalNote[]   @relation("LibraryItemNotes")
+
+  @@index([organizationId], name: "library_items_organization_id_idx")
+  @@index([isSystemDocument], name: "library_items_system_idx")
+  @@index([court], name: "library_items_court_idx")
+  @@index([category], name: "library_items_category_idx")
+  @@map("library_items")
+}
+
+// ---------------------------------------------------------------------------
+// Legal Research — Personal legal notes (highlighted paragraphs)
+// ---------------------------------------------------------------------------
+
+model LegalNote {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  createdById    String   @map("created_by_id") @db.Uuid
+  libraryItemId  String?  @map("library_item_id") @db.Uuid
+  pageNumber     Int      @map("page_number")
+  selectedText   String   @map("selected_text") @db.Text
+  personalNote   String?  @map("personal_note") @db.Text
+  title          String   @db.VarChar(500)
+  citation       String?  @db.VarChar(255)
+  court          String?  @db.VarChar(255)
+  tags           String[] @default([])
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization   Organization    @relation("OrganizationLegalNotes", fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy      User            @relation("LegalNoteCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  libraryItem    LibraryItem?    @relation("LibraryItemNotes", fields: [libraryItemId], references: [id], onDelete: SetNull)
+  caseReferences CaseReference[] @relation("LegalNoteCaseReferences")
+
+  @@index([organizationId], name: "legal_notes_organization_id_idx")
+  @@index([createdById], name: "legal_notes_created_by_id_idx")
+  @@index([libraryItemId], name: "legal_notes_library_item_id_idx")
+  @@index([court], name: "legal_notes_court_idx")
+  @@index([citation], name: "legal_notes_citation_idx")
+  @@map("legal_notes")
+}
+
+// ---------------------------------------------------------------------------
+// Legal Research — Case ↔ Legal Note (many-to-many)
+// ---------------------------------------------------------------------------
+
+model CaseReference {
+  id           String   @id @default(uuid()) @db.Uuid
+  caseId       String   @map("case_id") @db.Uuid
+  legalNoteId  String   @map("legal_note_id") @db.Uuid
+  attachedById String   @map("attached_by_id") @db.Uuid
+  attachedAt   DateTime @default(now()) @map("attached_at")
+
+  case       Case      @relation("CaseLegalReferences", fields: [caseId], references: [id], onDelete: Cascade)
+  legalNote  LegalNote @relation("LegalNoteCaseReferences", fields: [legalNoteId], references: [id], onDelete: Cascade)
+  attachedBy User      @relation("CaseReferenceAttacher", fields: [attachedById], references: [id], onDelete: Restrict)
+
+  @@unique([caseId, legalNoteId], name: "case_references_case_note_unique")
+  @@index([caseId], name: "case_references_case_id_idx")
+  @@index([legalNoteId], name: "case_references_legal_note_id_idx")
+  @@map("case_references")
 }

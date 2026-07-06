@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useAuthStore } from '@/store/auth.store';
 import { ROUTES } from '@/utils/constants';
+import { useAuthHydrated } from '@/hooks/useAuthHydrated';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -13,21 +14,17 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
+  const authHydrated = useAuthHydrated();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const accessToken = useAuthStore((s) => s.accessToken);
-  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (hydrated && !isAuthenticated && !accessToken) {
+    if (authHydrated && !isAuthenticated && !accessToken) {
       router.replace(ROUTES.login);
     }
-  }, [hydrated, isAuthenticated, accessToken, router]);
+  }, [authHydrated, isAuthenticated, accessToken, router]);
 
-  if (!hydrated) {
+  if (!authHydrated) {
     return (
       <Box
         sx={{

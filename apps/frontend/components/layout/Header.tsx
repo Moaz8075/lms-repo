@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
-import InputBase from '@mui/material/InputBase';
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import Menu from '@mui/material/Menu';
@@ -14,9 +13,9 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import Badge from '@mui/material/Badge';
 import MenuIcon from '@mui/icons-material/Menu';
-import SearchIcon from '@mui/icons-material/Search';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 import { getInitials } from '@/utils/format';
 import { ROUTES } from '@/utils/constants';
 
@@ -27,6 +26,7 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const router = useRouter();
   const { user, organization, clearAuth } = useAuth();
+  const { isAdmin } = usePermissions();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleLogout = () => {
@@ -51,24 +51,6 @@ export function Header({ onMenuClick }: HeaderProps) {
         >
           <MenuIcon />
         </IconButton>
-
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            bgcolor: 'background.default',
-            borderRadius: 2,
-            px: 1.5,
-            py: 0.5,
-            flex: 1,
-            maxWidth: 480,
-            border: '1px solid',
-            borderColor: 'divider',
-          }}
-        >
-          <SearchIcon fontSize="small" sx={{ color: 'text.secondary', mr: 1 }} />
-          <InputBase placeholder="Search cases, clients..." sx={{ flex: 1, fontSize: 14 }} />
-        </Box>
 
         <Box sx={{ flexGrow: 1 }} />
 
@@ -105,9 +87,11 @@ export function Header({ onMenuClick }: HeaderProps) {
             )}
           </Box>
           <Divider />
-          <MenuItem onClick={() => { setAnchorEl(null); router.push(ROUTES.settings); }}>
-            Settings
-          </MenuItem>
+          {isAdmin && (
+            <MenuItem onClick={() => { setAnchorEl(null); router.push(ROUTES.settings); }}>
+              Settings
+            </MenuItem>
+          )}
           <MenuItem onClick={handleLogout}>Logout</MenuItem>
         </Menu>
       </Toolbar>

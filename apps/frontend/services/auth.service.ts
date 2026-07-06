@@ -1,5 +1,5 @@
 import { api, unwrap } from './api';
-import type { LoginPayload, LoginResponse, RegisterPayload } from '@/types';
+import type { LoginPayload, LoginResponse, ProfileResponse, RegisterPayload } from '@/types';
 
 export const authService = {
   login: (payload: LoginPayload) =>
@@ -10,5 +10,5 @@ export const authService = {
 
   logout: () => unwrap<void>(api.post('/auth/logout')),
 
-  me: () => unwrap<LoginResponse['user']>(api.get('/auth/me')),
+  me: () => unwrap<ProfileResponse>(api.get('/auth/me')),
 };

@@ -1,0 +1,58 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+
+const CNIC_PATTERN = /^(\d{5}-\d{7}-\d|\d{13})$/;
+
+export class UpdateClientDto {
+  @ApiPropertyOptional({ example: 'Zahid Hassan' })
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(200)
+  name?: string;
+
+  @ApiPropertyOptional({ example: 'Muhammad Hassan' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  fatherName?: string;
+
+  @ApiPropertyOptional({ example: '42101-1234567-1' })
+  @IsOptional()
+  @IsString()
+  @Matches(CNIC_PATTERN, {
+    message: 'CNIC must be in format 42101-1234567-1 or 13 digits',
+  })
+  cnic?: string;
+
+  @ApiPropertyOptional({ example: '+923211234567' })
+  @IsOptional()
+  @IsString()
+  @MinLength(7)
+  @MaxLength(20)
+  phone?: string;
+
+  @ApiPropertyOptional({ example: '+923211234567' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  whatsapp?: string;
+
+  @ApiPropertyOptional({ example: 'House 12, Block B, Gulshan-e-Iqbal, Karachi' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  address?: string;
+
+  @ApiPropertyOptional({ example: 'Updated notes' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  notes?: string;
+}

@@ -21,10 +21,14 @@ import { ROUTES } from '@/utils/constants';
 const registerSchema = z
   .object({
     organizationName: z.string().min(2, 'Organization name is required'),
-    firstName: z.string().min(1, 'First name is required'),
-    lastName: z.string().min(1, 'Last name is required'),
+    adminName: z.string().min(2, 'Admin name is required'),
     email: z.string().email('Enter a valid email'),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/, {
+        message: 'Password must include uppercase, lowercase, and a number',
+      }),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -54,6 +58,7 @@ export default function RegisterPage() {
       setAuth({
         user: response.user,
         organization: response.organization,
+        permissions: response.permissions,
         accessToken: response.tokens.accessToken,
         refreshToken: response.tokens.refreshToken,
       });
@@ -93,24 +98,14 @@ export default function RegisterPage() {
             error={!!errors.organizationName}
             helperText={errors.organizationName?.message}
           />
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField
-              {...register('firstName')}
-              label="First Name"
-              fullWidth
-              margin="normal"
-              error={!!errors.firstName}
-              helperText={errors.firstName?.message}
-            />
-            <TextField
-              {...register('lastName')}
-              label="Last Name"
-              fullWidth
-              margin="normal"
-              error={!!errors.lastName}
-              helperText={errors.lastName?.message}
-            />
-          </Box>
+          <TextField
+            {...register('adminName')}
+            label="Admin Full Name"
+            fullWidth
+            margin="normal"
+            error={!!errors.adminName}
+            helperText={errors.adminName?.message}
+          />
           <TextField
             {...register('email')}
             label="Email"

@@ -10,7 +10,6 @@ export interface HearingResponse {
   courtRoom: string | null;
   purpose: string | null;
   notes: string | null;
-  outcome: string;
   nextHearingDate: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -45,7 +44,6 @@ export function toHearingResponse(hearing: Hearing): HearingResponse {
     courtRoom: hearing.courtRoom,
     purpose: hearing.purpose,
     notes: hearing.notes,
-    outcome: hearing.outcome,
     nextHearingDate: hearing.nextHearingDate,
     createdAt: hearing.createdAt,
     updatedAt: hearing.updatedAt,

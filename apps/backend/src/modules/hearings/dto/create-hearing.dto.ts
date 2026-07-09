@@ -1,14 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsDateString,
-  IsEnum,
   IsOptional,
   IsString,
   IsUUID,
   Matches,
   MaxLength,
 } from 'class-validator';
-import { HearingOutcome } from '@prisma/client';
 
 export class CreateHearingDto {
   @ApiProperty({ example: 'uuid-of-case' })
@@ -43,9 +41,4 @@ export class CreateHearingDto {
   @IsString()
   @MaxLength(2000)
   notes?: string;
-
-  @ApiPropertyOptional({ enum: HearingOutcome, default: HearingOutcome.PENDING })
-  @IsOptional()
-  @IsEnum(HearingOutcome)
-  outcome?: HearingOutcome;
 }

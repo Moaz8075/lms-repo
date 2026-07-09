@@ -15,8 +15,6 @@ import PeopleIcon from '@mui/icons-material/People';
 import GavelIcon from '@mui/icons-material/Gavel';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
-import PaymentsIcon from '@mui/icons-material/Payments';
-import ReceiptIcon from '@mui/icons-material/Receipt';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BalanceIcon from '@mui/icons-material/Balance';
 import { NAV_ITEMS, SIDEBAR_WIDTH } from '@/utils/constants';
@@ -29,8 +27,6 @@ const ICON_MAP = {
   Gavel: GavelIcon,
   MenuBook: MenuBookIcon,
   LibraryBooks: LibraryBooksIcon,
-  Payments: PaymentsIcon,
-  Receipt: ReceiptIcon,
   Settings: SettingsIcon,
 } as const;
 

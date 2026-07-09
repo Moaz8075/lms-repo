@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { AUTH_COOKIE_KEY } from '@/utils/constants';
+import { AUTH_COOKIE_KEY, DEFAULT_ROUTE } from '@/utils/constants';
 
 const PUBLIC_PATHS = ['/login', '/register'];
 
@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
   }
 
   if (token && isPublicPath) {
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL(DEFAULT_ROUTE, request.url));
   }
 
   return NextResponse.next();

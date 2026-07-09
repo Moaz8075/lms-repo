@@ -46,17 +46,6 @@ export enum CaseType {
   OTHER = 'OTHER',
 }
 
-export enum HearingOutcome {
-  PENDING = 'PENDING',
-  ADJOURNED = 'ADJOURNED',
-  COMPLETED = 'COMPLETED',
-  DISMISSED = 'DISMISSED',
-  SETTLED = 'SETTLED',
-  WITHDRAWN = 'WITHDRAWN',
-  PARTIAL = 'PARTIAL',
-  CANCELLED = 'CANCELLED',
-}
-
 export enum PaymentStatus {
   PAID = 'paid',
   PARTIAL = 'partial',
@@ -283,7 +272,6 @@ export interface Hearing {
   courtRoom: string | null;
   purpose: string | null;
   notes: string | null;
-  outcome: HearingOutcome;
   nextHearingDate: string | null;
   createdAt: string;
   updatedAt: string;
@@ -509,7 +497,6 @@ export interface CreateHearingPayload {
   courtRoom?: string;
   purpose?: string;
   notes?: string;
-  outcome?: HearingOutcome;
 }
 
 export interface UpdateHearingPayload extends Partial<Omit<CreateHearingPayload, 'caseId'>> {

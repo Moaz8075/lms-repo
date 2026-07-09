@@ -275,6 +275,47 @@ export class CasesService {
       where.clientId = query.clientId;
     }
 
+    if (query.caseType) {
+      where.caseType = query.caseType;
+    }
+
+    if (query.assignedLawyerId) {
+      where.assignedLawyerId = query.assignedLawyerId;
+    }
+
+    if (query.ongoing && !query.status) {
+      where.status = { in: [CaseStatus.OPEN, CaseStatus.IN_PROGRESS] };
+    }
+
+    if (query.filedFrom || query.filedTo) {
+      where.filedDate = {
+        ...(query.filedFrom ? { gte: new Date(query.filedFrom) } : {}),
+        ...(query.filedTo ? { lte: new Date(query.filedTo) } : {}),
+      };
+    }
+
+    if (query.hearingToday) {
+      const today = new Date();
+      const dayStart = new Date(
+        Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
+      );
+      const dayEnd = new Date(dayStart);
+      dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
+
+      andConditions.push({
+        OR: [
+          { nextHearingDate: { gte: dayStart, lt: dayEnd } },
+          {
+            hearings: {
+              some: {
+                scheduledDate: { gte: dayStart, lt: dayEnd },
+              },
+            },
+          },
+        ],
+      });
+    }
+
     if (query.courtName) {
       andConditions.push({
         courtName: {

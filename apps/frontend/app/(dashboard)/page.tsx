@@ -13,7 +13,7 @@ import NextLink from 'next/link';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatCard } from '@/components/ui/StatCard';
 import { DataTable } from '@/components/ui/DataTable';
-import { CaseStatusChip, HearingOutcomeChip } from '@/components/ui/StatusChip';
+import { CaseStatusChip } from '@/components/ui/StatusChip';
 import { MonoLabel } from '@/components/ui/MonoLabel';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganizationStats } from '@/hooks/useOrganization';
@@ -152,11 +152,6 @@ export default function DashboardPage() {
                 label: 'Date',
                 render: (row) => formatDate(row.nextHearingDate),
               },
-              {
-                id: 'status',
-                label: 'Status',
-                render: () => <HearingOutcomeChip outcome="PENDING" />,
-              },
             ]}
           />
         </Grid>
@@ -183,7 +178,7 @@ export default function DashboardPage() {
             }}
           >
             <Typography color="text.secondary">
-              Select a case on the Payments page to view payment history
+              Open a case to view and record payments
             </Typography>
           </Box>
         </Grid>

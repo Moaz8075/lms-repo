@@ -9,7 +9,6 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { CaseSelect } from '@/components/ui/CaseSelect';
 import { DataTable } from '@/components/ui/DataTable';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { HearingOutcomeChip } from '@/components/ui/StatusChip';
 import { AddHearingModal } from '@/components/modals/AddHearingModal';
 import { useSelectedCaseId } from '@/hooks/useCaseSelection';
 import { useHearings } from '@/hooks/useHearings';
@@ -47,11 +46,6 @@ function HearingsContent() {
           { id: 'time', label: 'Time', render: (row) => formatTime(row.time) },
           { id: 'courtRoom', label: 'Court Room', render: (row) => row.courtRoom ?? '—' },
           { id: 'purpose', label: 'Purpose', render: (row) => row.purpose ?? '—' },
-          {
-            id: 'outcome',
-            label: 'Outcome',
-            render: (row) => <HearingOutcomeChip outcome={row.outcome} />,
-          },
         ]}
       />
       <AddHearingModal open={modalOpen} onClose={() => setModalOpen(false)} caseId={caseId} />

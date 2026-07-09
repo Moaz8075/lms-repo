@@ -239,7 +239,7 @@ export class DiaryService {
       courtName: hearing.case.courtName,
       time,
       description: hearing.notes ?? hearing.purpose,
-      status: hearing.outcome,
+      status: 'SCHEDULED',
       lastHearingDate,
     };
   }

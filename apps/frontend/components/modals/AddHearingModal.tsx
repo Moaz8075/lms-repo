@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import MenuItem from '@mui/material/MenuItem';
 import Alert from '@mui/material/Alert';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,7 +10,6 @@ import { z } from 'zod';
 import EventOutlinedIcon from '@mui/icons-material/EventOutlined';
 import { FormDialog } from '@/components/ui/FormDialog';
 import { useCreateHearing } from '@/hooks/useHearings';
-import { HearingOutcome } from '@/types';
 
 const schema = z.object({
   hearingDate: z.string().min(1, 'Date is required'),
@@ -19,7 +17,6 @@ const schema = z.object({
   courtRoom: z.string().optional(),
   purpose: z.string().optional(),
   notes: z.string().optional(),
-  outcome: z.nativeEnum(HearingOutcome).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -39,11 +36,10 @@ export function AddHearingModal({ open, onClose, caseId }: AddHearingModalProps)
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { outcome: HearingOutcome.PENDING },
   });
 
   useEffect(() => {
-    if (!open) reset({ outcome: HearingOutcome.PENDING });
+    if (!open) reset();
   }, [open, reset]);
 
   const onSubmit = handleSubmit(async (values) => {
@@ -88,13 +84,6 @@ export function AddHearingModal({ open, onClose, caseId }: AddHearingModalProps)
         <TextField label="Court Room" fullWidth {...register('courtRoom')} />
         <TextField label="Purpose" fullWidth {...register('purpose')} />
         <TextField label="Notes" fullWidth multiline rows={2} {...register('notes')} />
-        <TextField select label="Outcome" fullWidth {...register('outcome')}>
-          {Object.values(HearingOutcome).map((o) => (
-            <MenuItem key={o} value={o}>
-              {o.replace(/_/g, ' ')}
-            </MenuItem>
-          ))}
-        </TextField>
       </Stack>
     </FormDialog>
   );

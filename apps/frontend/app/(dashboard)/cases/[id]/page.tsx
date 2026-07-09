@@ -34,7 +34,6 @@ import {
   CaseTypeChip,
   PaymentStatusChip,
   PaymentMethodChip,
-  HearingOutcomeChip,
 } from '@/components/ui/StatusChip';
 import { AddHearingModal } from '@/components/modals/AddHearingModal';
 import { UploadDocumentModal } from '@/components/modals/UploadDocumentModal';
@@ -243,11 +242,6 @@ export default function CaseDetailsPage({ params }: CaseDetailsPageProps) {
               { id: 'time', label: 'Time', render: (row) => formatTime(row.time) },
               { id: 'courtRoom', label: 'Court Room', render: (row) => row.courtRoom ?? '—' },
               { id: 'purpose', label: 'Purpose', render: (row) => row.purpose ?? '—' },
-              {
-                id: 'outcome',
-                label: 'Outcome',
-                render: (row) => <HearingOutcomeChip outcome={row.outcome} />,
-              },
             ]}
           />
         </>

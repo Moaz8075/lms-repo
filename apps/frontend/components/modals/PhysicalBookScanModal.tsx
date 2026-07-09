@@ -13,7 +13,11 @@ import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import DocumentScannerOutlinedIcon from '@mui/icons-material/DocumentScannerOutlined';
 import { NumberField } from '@/components/ui/NumberField';
 import { FormDialog } from '@/components/ui/FormDialog';
+import { CaseAttachSelect } from '@/components/legal-research/CaseAttachSelect';
 import { useCreateLegalNote } from '@/hooks/useLegalNotes';
+import { useAttachNoteToCase } from '@/hooks/useCaseReferences';
+import { usePermissions } from '@/hooks/usePermissions';
+import { PermissionResource } from '@/types/permissions';
 import { extractTextFromImage } from '@/utils/ocr';
 import { suggestNoteTitle } from '@/utils/legal-research';
 import { parseTagsInput } from '@/components/legal-research/TagChips';
@@ -24,7 +28,9 @@ interface PhysicalBookScanModalProps {
 }
 
 export function PhysicalBookScanModal({ open, onClose }: PhysicalBookScanModalProps) {
+  const { canView } = usePermissions();
   const createNote = useCreateLegalNote();
+  const attachNoteToCase = useAttachNoteToCase();
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
@@ -40,6 +46,8 @@ export function PhysicalBookScanModal({ open, onClose }: PhysicalBookScanModalPr
   const [noteTitle, setNoteTitle] = useState('');
   const [personalNote, setPersonalNote] = useState('');
   const [tagsInput, setTagsInput] = useState('physical-book');
+  const [caseId, setCaseId] = useState('');
+  const [attachError, setAttachError] = useState<string | null>(null);
   const [ocrProgress, setOcrProgress] = useState<number | null>(null);
   const [ocrError, setOcrError] = useState<string | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
@@ -66,6 +74,8 @@ export function PhysicalBookScanModal({ open, onClose }: PhysicalBookScanModalPr
       setNoteTitle('');
       setPersonalNote('');
       setTagsInput('physical-book');
+      setCaseId('');
+      setAttachError(null);
       setOcrProgress(null);
       setOcrError(null);
       setIsExtracting(false);
@@ -222,7 +232,9 @@ export function PhysicalBookScanModal({ open, onClose }: PhysicalBookScanModalPr
       return;
     }
 
-    await createNote.mutateAsync({
+    setAttachError(null);
+
+    const note = await createNote.mutateAsync({
       title: noteTitle.trim(),
       pageNumber: page,
       selectedText: text,
@@ -231,8 +243,25 @@ export function PhysicalBookScanModal({ open, onClose }: PhysicalBookScanModalPr
       court: court.trim() || undefined,
       tags: tagsInput ? parseTagsInput(tagsInput) : ['physical-book'],
     });
+
+    if (caseId) {
+      try {
+        await attachNoteToCase.mutateAsync({
+          caseId,
+          legalNoteId: note.id,
+        });
+      } catch {
+        setAttachError(
+          'Note saved, but it could not be linked to the case. Attach it manually from the case References tab.',
+        );
+        return;
+      }
+    }
+
     onClose();
   };
+
+  const isSaving = createNote.isPending || attachNoteToCase.isPending;
 
   return (
     <FormDialog
@@ -243,7 +272,7 @@ export function PhysicalBookScanModal({ open, onClose }: PhysicalBookScanModalPr
       onSubmit={() => {
         void handleSubmit();
       }}
-      loading={createNote.isPending}
+      loading={isSaving}
       accent="teal"
       icon={<DocumentScannerOutlinedIcon />}
       maxWidth={cameraOpen ? 'lg' : 'md'}
@@ -252,6 +281,7 @@ export function PhysicalBookScanModal({ open, onClose }: PhysicalBookScanModalPr
         {(createNote.isError || ocrError) && (
           <Alert severity="error">{ocrError ?? 'Failed to save note. Please try again.'}</Alert>
         )}
+        {attachError && <Alert severity="warning">{attachError}</Alert>}
 
         {!cameraOpen && (
           <Alert severity="info" sx={{ py: 0.5 }}>
@@ -437,6 +467,10 @@ export function PhysicalBookScanModal({ open, onClose }: PhysicalBookScanModalPr
           value={tagsInput}
           onChange={(e) => setTagsInput(e.target.value)}
         />
+
+        {canView(PermissionResource.CASES) && (
+          <CaseAttachSelect value={caseId} onChange={setCaseId} />
+        )}
       </Stack>
     </FormDialog>
   );

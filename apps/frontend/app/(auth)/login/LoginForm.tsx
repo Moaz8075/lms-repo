@@ -16,7 +16,7 @@ import Alert from '@mui/material/Alert';
 import BalanceIcon from '@mui/icons-material/Balance';
 import { authService } from '@/services/auth.service';
 import { useAuth } from '@/hooks/useAuth';
-import { ROUTES } from '@/utils/constants';
+import { ROUTES, DEFAULT_ROUTE } from '@/utils/constants';
 
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -51,7 +51,7 @@ export default function LoginForm() {
         accessToken: response.tokens.accessToken,
         refreshToken: response.tokens.refreshToken,
       });
-      const redirect = searchParams.get('redirect') || ROUTES.dashboard;
+      const redirect = searchParams.get('redirect') || DEFAULT_ROUTE;
       router.push(redirect);
     } catch {
       setError('Invalid email or password. Please try again.');

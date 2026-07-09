@@ -18,7 +18,10 @@
     "prisma:seed": "yarn workspace @lms/backend prisma:seed",
     "frontend:dev": "yarn workspace @lms/frontend dev",
     "frontend:build": "yarn workspace @lms/frontend build",
-    "frontend:start": "yarn workspace @lms/frontend start"
+    "frontend:start": "yarn workspace @lms/frontend start",
+    "mobile:start": "yarn workspace @lms/mobile start",
+    "mobile:android": "yarn workspace @lms/mobile android",
+    "mobile:ios": "yarn workspace @lms/mobile ios"
   },
   "engines": {
     "node": ">=20.0.0"

@@ -81,20 +81,6 @@ export function PaymentStatusChip({ status }: { status: PaymentStatus | string }
   return <StatusChip status={status} styles={PAYMENT_STATUS_STYLES} />;
 }
 
-export function HearingOutcomeChip({ outcome }: { outcome: string }) {
-  const map: Record<string, ChipStyle> = {
-    PENDING: STATUS_CHIP_STYLES.open,
-    ADJOURNED: STATUS_CHIP_STYLES.pending,
-    COMPLETED: STATUS_CHIP_STYLES.paid,
-    DISMISSED: STATUS_CHIP_STYLES.overdue,
-    SETTLED: STATUS_CHIP_STYLES.closed,
-    WITHDRAWN: STATUS_CHIP_STYLES.archived,
-    PARTIAL: STATUS_CHIP_STYLES.partial,
-    CANCELLED: STATUS_CHIP_STYLES.cancelled,
-  };
-  return <StatusChip status={outcome} styles={map} />;
-}
-
 export function ActiveStatusChip({ active }: { active: boolean }) {
   const style = active ? STATUS_CHIP_STYLES.active : STATUS_CHIP_STYLES.inactive;
   return <ColorChip label={active ? 'Active' : 'Inactive'} style={style} />;

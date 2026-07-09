@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ActivityType, HearingOutcome, Prisma } from '@prisma/client';
+import { ActivityType, Prisma } from '@prisma/client';
 import { PaginatedResult } from '../../common/interfaces';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
@@ -29,7 +29,6 @@ export class HearingsService {
     await this.validateCase(organizationId, dto.caseId);
 
     const scheduledDate = combineDateAndTime(dto.hearingDate, dto.time);
-    const outcome = dto.outcome ?? HearingOutcome.PENDING;
 
     const hearing = await this.prisma.$transaction(async (tx) => {
       const created = await tx.hearing.create({
@@ -40,7 +39,6 @@ export class HearingsService {
           courtRoom: dto.courtRoom?.trim() || null,
           purpose: dto.purpose?.trim() || null,
           notes: dto.notes?.trim() || null,
-          outcome,
         },
       });
 
@@ -59,7 +57,6 @@ export class HearingsService {
       metadata: {
         caseId: dto.caseId,
         scheduledDate: hearing.scheduledDate,
-        outcome: hearing.outcome,
       },
     });
 
@@ -132,7 +129,6 @@ export class HearingsService {
             purpose: dto.purpose.trim() || null,
           }),
           ...(dto.notes !== undefined && { notes: dto.notes.trim() || null }),
-          ...(dto.outcome !== undefined && { outcome: dto.outcome }),
           ...(dto.nextHearingDate !== undefined && {
             nextHearingDate: dto.nextHearingDate
               ? new Date(dto.nextHearingDate)
@@ -155,7 +151,6 @@ export class HearingsService {
       description: `Hearing updated for case`,
       metadata: {
         caseId: updated.caseId,
-        outcome: updated.outcome,
         scheduledDate: updated.scheduledDate,
       },
     });
@@ -195,7 +190,6 @@ export class HearingsService {
         organizationId,
         caseId,
         scheduledDate: { gte: new Date() },
-        outcome: HearingOutcome.PENDING,
       },
       orderBy: { scheduledDate: 'asc' },
     });

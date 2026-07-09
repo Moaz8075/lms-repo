@@ -15,10 +15,13 @@ build/
 logs/
 *.log
 npm-debug.log*
+apps/backend/logs/
 
-# IDE
+# IDE / AI tooling
 .idea/
 .vscode/
+.claude/
+.cursor/
 *.swp
 *.swo
 

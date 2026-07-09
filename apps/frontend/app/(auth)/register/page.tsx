@@ -16,7 +16,7 @@ import Alert from '@mui/material/Alert';
 import BalanceIcon from '@mui/icons-material/Balance';
 import { authService } from '@/services/auth.service';
 import { useAuth } from '@/hooks/useAuth';
-import { ROUTES } from '@/utils/constants';
+import { ROUTES, DEFAULT_ROUTE } from '@/utils/constants';
 
 const registerSchema = z
   .object({
@@ -62,7 +62,7 @@ export default function RegisterPage() {
         accessToken: response.tokens.accessToken,
         refreshToken: response.tokens.refreshToken,
       });
-      router.push(ROUTES.dashboard);
+      router.push(DEFAULT_ROUTE);
     } catch {
       setError('Registration failed. Please check your details and try again.');
     }

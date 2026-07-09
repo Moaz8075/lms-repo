@@ -31,3 +31,14 @@ export function useDetachCaseReference(caseId: string) {
     },
   });
 }
+
+export function useAttachNoteToCase() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ caseId, legalNoteId }: { caseId: string; legalNoteId: string }) =>
+      caseReferencesService.attach(caseId, { legalNoteId }),
+    onSuccess: (_, { caseId }) => {
+      queryClient.invalidateQueries({ queryKey: ['case-references', caseId] });
+    },
+  });
+}

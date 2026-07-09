@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
@@ -11,8 +11,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import StickyNote2OutlinedIcon from '@mui/icons-material/StickyNote2Outlined';
 import { FormDialog } from '@/components/ui/FormDialog';
+import { CaseAttachSelect } from '@/components/legal-research/CaseAttachSelect';
 import { useCreateLegalNote } from '@/hooks/useLegalNotes';
+import { useAttachNoteToCase } from '@/hooks/useCaseReferences';
 import { useLegalLibrary } from '@/hooks/useLegalLibrary';
+import { usePermissions } from '@/hooks/usePermissions';
+import { PermissionResource } from '@/types/permissions';
 import { parseTagsInput } from '@/components/legal-research/TagChips';
 
 const schema = z.object({
@@ -24,6 +28,7 @@ const schema = z.object({
   citation: z.string().optional(),
   court: z.string().optional(),
   tagsInput: z.string().optional(),
+  caseId: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -49,19 +54,26 @@ export function CreateLegalNoteModal({
   defaultSelectedText,
   defaultTitle,
 }: CreateLegalNoteModalProps) {
+  const { canView } = usePermissions();
   const createNote = useCreateLegalNote();
+  const attachNoteToCase = useAttachNoteToCase();
+  const [attachError, setAttachError] = useState<string | null>(null);
   const { data: libraryData } = useLegalLibrary({ page: 1, limit: 100 });
   const {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
+  const selectedCaseId = watch('caseId') ?? '';
 
   useEffect(() => {
     if (open) {
+      setAttachError(null);
       reset({
         libraryItemId: libraryItemId ?? '',
         citation: defaultCitation ?? '',
@@ -71,6 +83,7 @@ export function CreateLegalNoteModal({
         personalNote: '',
         title: defaultTitle ?? '',
         tagsInput: '',
+        caseId: '',
       });
     }
   }, [
@@ -85,7 +98,8 @@ export function CreateLegalNoteModal({
   ]);
 
   const onSubmit = handleSubmit(async (values) => {
-    await createNote.mutateAsync({
+    setAttachError(null);
+    const note = await createNote.mutateAsync({
       title: values.title,
       pageNumber: Number(values.pageNumber),
       selectedText: values.selectedText,
@@ -95,8 +109,25 @@ export function CreateLegalNoteModal({
       court: values.court,
       tags: values.tagsInput ? parseTagsInput(values.tagsInput) : [],
     });
+
+    if (values.caseId) {
+      try {
+        await attachNoteToCase.mutateAsync({
+          caseId: values.caseId,
+          legalNoteId: note.id,
+        });
+      } catch {
+        setAttachError(
+          'Note saved, but it could not be linked to the case. Attach it manually from the case References tab.',
+        );
+        return;
+      }
+    }
+
     onClose();
   });
+
+  const isSaving = createNote.isPending || attachNoteToCase.isPending;
 
   return (
     <FormDialog
@@ -105,7 +136,7 @@ export function CreateLegalNoteModal({
       title="Create Legal Note"
       submitLabel="Save Note"
       onSubmit={onSubmit}
-      loading={createNote.isPending}
+      loading={isSaving}
       accent="violet"
       icon={<StickyNote2OutlinedIcon />}
       maxWidth="md"
@@ -114,6 +145,7 @@ export function CreateLegalNoteModal({
         {createNote.isError && (
           <Alert severity="error">Failed to save note. Please try again.</Alert>
         )}
+        {attachError && <Alert severity="warning">{attachError}</Alert>}
         <TextField
           label="Note Title"
           required
@@ -168,6 +200,12 @@ export function CreateLegalNoteModal({
           placeholder="bail, constitutional (comma-separated)"
           {...register('tagsInput')}
         />
+        {canView(PermissionResource.CASES) && (
+          <CaseAttachSelect
+            value={selectedCaseId}
+            onChange={(caseId) => setValue('caseId', caseId)}
+          />
+        )}
       </Stack>
     </FormDialog>
   );

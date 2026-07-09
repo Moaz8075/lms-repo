@@ -46,17 +46,6 @@ enum CaseType {
   OTHER
 }
 
-enum HearingOutcome {
-  PENDING
-  ADJOURNED
-  COMPLETED
-  DISMISSED
-  SETTLED
-  WITHDRAWN
-  PARTIAL
-  CANCELLED
-}
-
 enum DocumentFileType {
   PDF
   IMAGE
@@ -297,7 +286,6 @@ model Hearing {
   courtRoom             String?         @map("court_room") @db.VarChar(100)
   purpose               String?         @db.VarChar(255)
   judgeName             String?         @map("judge_name") @db.VarChar(255)
-  outcome               HearingOutcome  @default(PENDING)
   notes                 String?         @db.Text
   nextHearingDate       DateTime?       @map("next_hearing_date")
   reminderSentAt        DateTime?       @map("reminder_sent_at")

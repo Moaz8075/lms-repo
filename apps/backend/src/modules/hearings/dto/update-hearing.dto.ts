@@ -1,13 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsDateString,
-  IsEnum,
   IsOptional,
   IsString,
   Matches,
   MaxLength,
 } from 'class-validator';
-import { HearingOutcome } from '@prisma/client';
 
 export class UpdateHearingDto {
   @ApiPropertyOptional({ example: '2026-07-15' })
@@ -40,11 +38,6 @@ export class UpdateHearingDto {
   @IsString()
   @MaxLength(2000)
   notes?: string;
-
-  @ApiPropertyOptional({ enum: HearingOutcome })
-  @IsOptional()
-  @IsEnum(HearingOutcome)
-  outcome?: HearingOutcome;
 
   @ApiPropertyOptional({ example: '2026-08-15' })
   @IsOptional()

@@ -67,9 +67,9 @@ async function bootstrap(): Promise<void> {
   });
 
   const port = configService.getOrThrow<number>('app.port');
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 
-  logger.log(`Application running on port ${port}`);
+  logger.log(`Application running on http://0.0.0.0:${port}`);
   logger.log(`Swagger docs available at /${SWAGGER_PATH}`);
 }
 

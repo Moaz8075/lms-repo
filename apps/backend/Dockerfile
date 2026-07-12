@@ -43,4 +43,4 @@ USER nestjs
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "yarn prisma:deploy && node dist/main"]
+CMD ["sh", "-c", "yarn prisma:deploy && node dist/src/main.js"]

@@ -1,1 +1,5 @@
-export { DiaryQueryDto, UpcomingDiaryQueryDto } from './diary-query.dto';
+export {
+  DiaryQueryDto,
+  UpcomingDiaryQueryDto,
+  DiaryCalendarQueryDto,
+} from './diary-query.dto';

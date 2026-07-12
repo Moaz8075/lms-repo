@@ -1,11 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
+import { useClients } from '@/features/clients/hooks';
 
-import { clientsApi } from '@/api/clients.api';
-import { clientsKeys } from '@/features/cases/constants';
-
-export function useClients(search?: string) {
-  return useQuery({
-    queryKey: clientsKeys.list(search),
-    queryFn: () => clientsApi.list({ page: 1, limit: 50, search: search || undefined }),
+/** Case-picker helper — lists clients for create-case forms. */
+export function useClientsForPicker(search?: string) {
+  return useClients({
+    page: 1,
+    limit: 50,
+    search: search?.trim() || undefined,
   });
 }

@@ -1,8 +1,11 @@
-export { apiClient, unwrap } from './axios';
 export { authApi } from './auth.api';
+export { caseReferencesApi } from './case-references.api';
 export { casesApi } from './cases.api';
 export { clientsApi } from './clients.api';
 export { dashboardApi } from './dashboard.api';
+export { diaryApi } from './diary.api';
 export { hearingsApi } from './hearings.api';
+export { legalLibraryApi } from './legal-library.api';
+export { legalNotesApi } from './legal-notes.api';
 export { paymentsApi } from './payments.api';
 export { tasksApi } from './tasks.api';

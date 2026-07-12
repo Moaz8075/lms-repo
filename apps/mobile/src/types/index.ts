@@ -83,3 +83,7 @@ export interface ProfileResponse {
 export type { Theme } from '@/theme';
 export type * from '@/types/dashboard';
 export type * from '@/types/cases';
+export type * from '@/types/clients';
+export type * from '@/types/diary';
+export type * from '@/types/legal-research';
+export { LIBRARY_CATEGORIES } from '@/types/legal-research';

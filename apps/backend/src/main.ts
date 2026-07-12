@@ -1,19 +1,32 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { WinstonModule } from 'nest-winston';
+import { join } from 'path';
 import { AppModule } from './app.module';
 import { API_PREFIX, SWAGGER_PATH } from './common/constants';
 import { winstonConfig } from './config/logger.config';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: WinstonModule.createLogger(winstonConfig),
   });
 
   const configService = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
+
+  // Demo PDFs for Legal Research (mobile + web) — outside /api/v1 prefix
+  app.useStaticAssets(join(process.cwd(), 'public'), {
+    prefix: '/',
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.pdf')) {
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+      }
+    },
+  });
 
   app.setGlobalPrefix(API_PREFIX);
 
@@ -71,6 +84,7 @@ async function bootstrap(): Promise<void> {
 
   logger.log(`Application running on http://0.0.0.0:${port}`);
   logger.log(`Swagger docs available at /${SWAGGER_PATH}`);
+  logger.log(`Demo PDFs available at /demo/*.pdf`);
 }
 
 bootstrap();

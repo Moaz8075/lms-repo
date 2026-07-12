@@ -105,8 +105,8 @@ export default function DashboardScreen() {
                 actions={QUICK_ACTIONS}
                 onPress={(id) => {
                   if (id === 'case') router.push('/(protected)/(tabs)/cases/new');
-                  if (id === 'client') router.push('/(protected)/(tabs)/clients');
-                  if (id === 'schedule') router.push('/(protected)/(tabs)/diary');
+                  if (id === 'client') router.push('/(protected)/(tabs)/more/clients' as never);
+                  if (id === 'schedule') router.push('/(protected)/(tabs)/diary' as never);
                   if (id === 'payments') router.push('/(protected)/(tabs)/cases');
                 }}
               />

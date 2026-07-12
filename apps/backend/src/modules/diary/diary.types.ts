@@ -46,3 +46,48 @@ export interface UpcomingDateGroup {
 export interface UpcomingDiaryResponse {
   groups: UpcomingDateGroup[];
 }
+
+export interface CalendarDaySummary {
+  date: string;
+  hearingCount: number;
+  taskCount: number;
+  hasUrgent: boolean;
+}
+
+export interface DiaryCalendarResponse {
+  month: string;
+  days: CalendarDaySummary[];
+}
+
+export interface DiaryEntryDetailResponse {
+  hearing: {
+    id: string;
+    hearingDate: string;
+    time: string;
+    courtRoom: string | null;
+    purpose: string | null;
+    notes: string | null;
+    nextHearingDate: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+  case: {
+    id: string;
+    caseNumber: string;
+    title: string;
+    caseType: string;
+    status: string;
+    courtName: string | null;
+    judgeName: string | null;
+    description: string | null;
+    clientName: string;
+    clientPhone: string | null;
+    documentsCount: number;
+    paymentsSummary: {
+      total: number;
+      paid: number;
+      pending: number;
+      count: number;
+    };
+  };
+}

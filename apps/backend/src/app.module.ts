@@ -27,6 +27,7 @@ import { LegalLibraryModule } from './modules/legal-library/legal-library.module
 import { LegalNotesModule } from './modules/legal-notes/legal-notes.module';
 import { ActivityLogsModule } from './modules/activity-logs/activity-logs.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { DemoFilesModule } from './modules/demo-files/demo-files.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     LegalNotesModule,
     ActivityLogsModule,
     DashboardModule,
+    DemoFilesModule,
   ],
   providers: [
     {

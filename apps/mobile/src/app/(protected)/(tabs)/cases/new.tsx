@@ -8,24 +8,25 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppTabHeader } from '@/components/layout/AppTabHeader';
 import { useCreateCase } from '@/features/cases/hooks/useCases';
-import { useClients } from '@/features/cases/hooks/useClients';
+import { useClientsForPicker } from '@/features/cases/hooks/useClients';
 import { CASE_TYPE_OPTIONS, formatCaseType } from '@/features/cases/utils/case-format';
 import { useAuthContext, useTheme } from '@/providers';
 
 export default function NewCaseScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ clientId?: string }>();
   const insets = useSafeAreaInsets();
   const { user } = useAuthContext();
   const { typography, colors, borderRadius, spacing } = useTheme();
   const createCase = useCreateCase();
 
   const [clientSearch, setClientSearch] = useState('');
-  const [selectedClientId, setSelectedClientId] = useState('');
+  const [selectedClientId, setSelectedClientId] = useState(params.clientId ?? '');
   const [title, setTitle] = useState('');
   const [caseNumber, setCaseNumber] = useState('');
   const [caseType, setCaseType] = useState('CIVIL');
@@ -33,7 +34,7 @@ export default function NewCaseScreen() {
   const [opponentParty, setOpponentParty] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const { data: clientsData } = useClients(clientSearch);
+  const { data: clientsData } = useClientsForPicker(clientSearch);
 
   const handleSubmit = async () => {
     setError(null);

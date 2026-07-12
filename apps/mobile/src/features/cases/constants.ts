@@ -8,8 +8,4 @@ export const casesKeys = {
   payments: (caseId: string) => ['cases', caseId, 'payments'] as const,
 };
 
-export const clientsKeys = {
-  list: (search?: string) => ['clients', 'list', search ?? ''] as const,
-};
-
 export const CASES_REFETCH_INTERVAL_MS = 30_000;

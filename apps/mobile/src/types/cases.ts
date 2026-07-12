@@ -76,16 +76,6 @@ export interface CaseListParams {
   filedTo?: string;
 }
 
-export interface Client {
-  id: string;
-  name: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  email: string | null;
-  city: string | null;
-}
-
 export interface Hearing {
   id: string;
   caseId: string;

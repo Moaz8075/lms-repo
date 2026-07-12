@@ -41,4 +41,9 @@ export class CreateHearingDto {
   @IsString()
   @MaxLength(2000)
   notes?: string;
+
+  @ApiPropertyOptional({ example: '2026-08-01', description: 'Optional next hearing date' })
+  @IsOptional()
+  @IsDateString()
+  nextHearingDate?: string;
 }

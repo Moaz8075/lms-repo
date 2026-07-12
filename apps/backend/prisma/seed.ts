@@ -918,7 +918,8 @@ async function main(): Promise<void> {
   });
 
   // --- Legal Research (library, notes, case references) ---
-  const demoPdfBase = process.env.DEMO_PDF_BASE_URL ?? 'http://localhost:3001/demo';
+  const demoPdfBase =
+    process.env.DEMO_PDF_BASE_URL ?? 'http://localhost:3000/api/v1/demo';
   const demoPdfs = {
     bail: `${demoPdfBase}/pld-2021-sc-1-bail.pdf`,
     constitution: `${demoPdfBase}/constitution-art-10a.pdf`,

@@ -39,6 +39,9 @@ export class HearingsService {
           courtRoom: dto.courtRoom?.trim() || null,
           purpose: dto.purpose?.trim() || null,
           notes: dto.notes?.trim() || null,
+          nextHearingDate: dto.nextHearingDate
+            ? new Date(`${dto.nextHearingDate}T00:00:00.000Z`)
+            : null,
         },
       });
 

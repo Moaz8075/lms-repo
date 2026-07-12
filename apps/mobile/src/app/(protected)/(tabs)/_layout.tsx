@@ -51,10 +51,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="clients"
+        name="legal-research"
         options={{
-          title: 'Clients',
-          tabBarIcon: ({ focused }) => <TabIcon label="👥" focused={focused} />,
+          title: 'Research',
+          tabBarIcon: ({ focused }) => <TabIcon label="⚖️" focused={focused} />,
         }}
       />
       <Tabs.Screen

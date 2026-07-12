@@ -1,5 +1,15 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsOptional, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsDateString,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Matches,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class DiaryQueryDto {
   @ApiPropertyOptional({ example: '2026-06-18' })
@@ -20,5 +30,16 @@ export class UpcomingDiaryQueryDto {
 
   @ApiPropertyOptional({ description: 'Number of days ahead to include', default: 30 })
   @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(90)
   days?: number;
+}
+
+export class DiaryCalendarQueryDto {
+  @ApiPropertyOptional({ example: '2026-07', description: 'Month as YYYY-MM' })
+  @IsString()
+  @Matches(/^\d{4}-\d{2}$/, { message: 'month must be YYYY-MM' })
+  month!: string;
 }

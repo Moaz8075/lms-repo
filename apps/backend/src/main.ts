@@ -41,8 +41,9 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
+  // origin: true reflects the request Origin (allow any). origin: '*' cannot be used with credentials: true.
   app.enableCors({
-    origin: configService.get<string>('app.nodeEnv') === 'production' ? false : true,
+    origin: true,
     credentials: true,
   });
 

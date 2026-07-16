@@ -8,8 +8,8 @@ Multi-tenant SaaS monorepo for Pakistani law firms.
 lms-repo/
 ├── apps/
 │   ├── backend/          # NestJS API
-│   └── frontend/         # Frontend app (placeholder)
-├── docker-compose.yml    # PostgreSQL + backend services
+│   ├── frontend/         # Next.js web app
+│   └── mobile/           # Expo mobile app
 └── package.json          # Yarn workspaces root
 ```
 
@@ -22,7 +22,7 @@ lms-repo/
 - **JWT + Passport** — Authentication
 - **Swagger** — API documentation
 - **Winston** — Structured logging
-- **Docker** — Containerized deployment
+- **Docker** — Backend image for production (e.g. Render)
 
 ## Getting Started
 
@@ -30,8 +30,7 @@ lms-repo/
 
 - Node.js >= 20
 - Yarn 1.x
-- Docker & Docker Compose (optional)
-- PostgreSQL 16 (if running locally without Docker)
+- PostgreSQL 16 (local) or a cloud database (e.g. Neon)
 
 ### Setup
 
@@ -41,9 +40,7 @@ yarn install
 
 # Copy environment variables
 cp apps/backend/.env.example apps/backend/.env
-
-# Start PostgreSQL (Docker)
-docker compose up postgres -d
+# Set DATABASE_URL to your local or cloud Postgres
 
 # Generate Prisma client
 yarn prisma:generate
@@ -72,12 +69,6 @@ yarn backend:dev
 | `yarn prisma:generate` | Generate Prisma client |
 | `yarn prisma:migrate` | Run database migrations |
 | `yarn prisma:studio` | Open Prisma Studio |
-
-### Docker (full stack)
-
-```bash
-docker compose up --build
-```
 
 ## Architecture
 
